@@ -424,6 +424,7 @@ func resourceComputeSubnetworkCreate(d *schema.ResourceData, meta interface{}) e
 		return err
 	} else if v, ok := d.GetOkExists("log_config"); ok || !reflect.DeepEqual(v, logConfigProp) {
 		obj["logConfig"] = logConfigProp
+		obj["enableFlowLogs"] = true
 	}
 	stackTypeProp, err := expandComputeSubnetworkStackType(d.Get("stack_type"), d, config)
 	if err != nil {
@@ -1049,7 +1050,6 @@ func flattenComputeSubnetworkLogConfig(v interface{}, d *schema.ResourceData, co
 		transformed["metadata_fields"] = nil
 	}
 	transformed["filter_expr"] = original["filterExpr"]
-
 	return []interface{}{transformed}
 }
 
@@ -1173,8 +1173,9 @@ func expandComputeSubnetworkLogConfig(v interface{}, d TerraformResourceData, co
 	transformed["aggregationInterval"] = original["aggregation_interval"]
 	transformed["flowSampling"] = original["flow_sampling"]
 	transformed["metadata"] = original["metadata"]
-	transformed["filterExpr"] = original["filter_expr"]
-
+	if original["filter_expr"] != "true" {
+		transformed["filterExpr"] = original["filter_expr"]
+	}
 	// make it JSON marshallable
 	transformed["metadataFields"] = original["metadata_fields"].(*schema.Set).List()
 
